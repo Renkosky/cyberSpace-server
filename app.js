@@ -1,4 +1,17 @@
-const Koa = require('koa')
+// import Koa from 'koa'
+// const app = new Koa()
+// import views from 'koa-views'
+// import static from 'koa-static'
+// import json from 'koa-json'
+// import onerror from 'koa-onerror'
+// import bodyparser from 'koa-bodyparser'
+// import session from './middleware/addsession'
+// import logger from 'koa-logger'
+// import Redis from 'koa-redis'
+// import mongoose from 'mongoose'
+// import dbconfig from './db/config'
+// import users from './routes/users.mjs'
+const Koa = require('Koa')
 const app = new Koa()
 const views = require('koa-views')
 const json = require('koa-json')
@@ -51,6 +64,7 @@ app.use(async (ctx, next) => {
 // routes
 app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
+// router.allowedMethods()用在了路由匹配router.routes()之后,所以在当所有路由中间件最后调用.此时根据ctx.status设置response响应头
 mongoose.connect(
   dbconfig.dbs,
   {
