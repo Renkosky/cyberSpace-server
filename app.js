@@ -25,6 +25,7 @@ const mongoose = require('mongoose')
 const dbconfig = require('./db/config')
 const index = require('./routes/index')
 const users = require('./routes/users')
+const passport = require('./util/passport')
 
 // error handler
 onerror(app)
@@ -33,8 +34,8 @@ onerror(app)
 app.keys = ['keys', 'othkeys'] //session加密
 app.use(
   session({
-    key: 'sess',
-    prefix: 'sesspr',
+    key: 'cyber',
+    prefix: 'cyber:uid',
     store: new Redis()
   })
 )

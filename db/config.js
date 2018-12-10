@@ -6,28 +6,28 @@ module.exports = {
     },
     get port() {
       return 6379
+    }
+  },
+  smtp: {
+    get host() {
+      return 'smtp.qq.com'
     },
-    smtp: {
-      get host() {
-        return 'smtp.qq.com'
-      },
-      get user() {
-        return '706569906@qq.com'
-      },
-      get pass() {
-        return ''
-      }
+    get user() {
+      return '706569906@qq.com'
     },
-    get code() {
-      return Math.random()
-        .toString(16)
-        .slice(2, 6)
-        .toUpperCase()
-    },
-    get expire() {
-      return () => {
-        return new Date().getTime() + 60 * 60 * 1000
-      }
+    get pass() {
+      return 'xwmiahgqzzmcbiej'
+    }
+  },
+  get code() {
+    return Math.random()
+      .toString(16)
+      .slice(2, 6)
+      .toUpperCase()
+  },
+  get expire() {
+    return () => {
+      return new Date().getTime() + 60 * 60 * 1000
     }
   }
 }
