@@ -4,8 +4,14 @@ const Redis = require('koa-redis')
 const nodemailer = require('nodemailer')
 const Email = require('../db/config')
 const axios = require('axios')
+const jwt = require('jsonwebtoken')
+const koaJwt = require('koa-jwt')
 const passport = require('koa-passport')
 const Store = new Redis().client
+
+const jwtSecret = 'secretCyberSpace'
+const tokenExpiresTime = 1000 * 60 * 60 * 24 * 7
+
 router.get('/', function(ctx, next) {
   ctx.body = 'this is a users response!'
 })
@@ -28,16 +34,9 @@ router.post('/addUser', async ctx => {
   }
 })
 
-// router.post('/getUser', async ctx => {
-//   const result = await User.findOne({ username: ctx.request.body.name })
-//   const results = await User.find({ username: ctx.request.body.name || null })
-//   ctx.body = {
-//     results
-//   }
-// })
-
 router.get('/getAllUser', async ctx => {
   const results = await User.find({})
+  console.log(process.env.NODE_ENV)
   ctx.body = {
     results
   }
@@ -55,33 +54,10 @@ router.post('/updateUser', async ctx => {
 })
 
 //注册接口
-router.post('register', async ctx => {
-  const { username, password, email, code } = ctx.request.body
-  //检查验证码
-  if (code) {
-    //在发验证码时会把验证码保存在redis中这里就要从redis中取出
-    const saveCode = await Store.hget(`nodemail:${username}`, 'code')
-    const saveExpire = await Store.hget(`nodemail:${username}`, 'expire')
-    if (code === saveCode) {
-      if (new Date().getTime() - saveExpire > 0) {
-        ctx.body = {
-          code: -1,
-          msg: '验证码过期，请重新尝试'
-        }
-        return false
-      }
-    } else {
-      ctx.body = {
-        code: -1,
-        msg: '请填写正确的验证码'
-      }
-    }
-  } else {
-    ctx.body = {
-      code: -1,
-      msg: '请填写验证码'
-    }
-  }
+router.post('/register', async ctx => {
+  // const { username, password, email, code } = ctx.request.body
+  const { username, password, email } = ctx.request.body
+
   //检查用户名
   let user = User.find({
     username
@@ -108,7 +84,7 @@ router.post('register', async ctx => {
       ctx.body = {
         code: 0,
         msg: '注册成功',
-        user: res.data.user
+        user: username
       }
     } else {
       ctx.body = {
@@ -125,29 +101,32 @@ router.post('register', async ctx => {
 })
 
 router.post('/login', async (ctx, next) => {
-  return passport.authenticate('local', function(err, user, info, status) {
-    if (err) {
-      ctx.body = {
-        code: -1,
-        msg: err
-      }
-    } else {
-      //拿到登陆用户
-      if (user) {
-        ctx.body = {
-          code: 0,
-          msg: '登陆成功',
-          user
-        }
-        return ctx.login(user)
-      } else {
-        ctx.body = {
-          code: 1,
-          msg: info
-        }
-      }
+  const { username, password } = ctx.request.body
+  console.log(username, password)
+  const result = await User.findOne({
+    username: username,
+    password: password
+  })
+  if (result) {
+    let payload = {
+      name: result.username,
+      _id: result.id
     }
-  })(ctx, next)
+    const token = jwt.sign(payload, jwtSecret, {
+      expiresIn: tokenExpiresTime
+    })
+    return (ctx.body = {
+      code: 0,
+      data: token,
+      message: '登陆成功'
+    })
+  } else {
+    return (ctx.body = {
+      code: -1,
+      data: null,
+      message: '用户名或密码错误'
+    })
+  }
 })
 
 router.post('/verify', async (ctx, next) => {

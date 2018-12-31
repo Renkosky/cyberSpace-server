@@ -16,7 +16,7 @@ module.exports = {
       return '706569906@qq.com'
     },
     get pass() {
-      return 'xwmiahgqzzmcbiej'
+      return 'xwmiahgqzzmcbiej' //hmzwukcvmiiqbgjj//qikysftqytlnbjde//cwpknhoqsgrmbgej
     }
   },
   get code() {
