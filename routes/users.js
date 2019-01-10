@@ -63,28 +63,26 @@ router.post('/register', async ctx => {
     username
   })
   if (user.length) {
+    ctx.stats = 410
     ctx.body = {
       code: -1,
       msg: '已被注册'
     }
   }
 
-  let newUser = await User.create({
-    username,
-    password,
-    email
-  })
+  let newUser = await User.create({ username, password, email, creat_time:new Date() });
   if (newUser) {
     let res = await axios.post('/login', {
       username,
-      password
+      password,
     })
 
     if (res.data && res.data.code === 0) {
       ctx.body = {
         code: 0,
         msg: '注册成功',
-        user: username
+        username,
+        user_id: newUser._id
       }
     } else {
       ctx.body = {
@@ -93,6 +91,7 @@ router.post('/register', async ctx => {
       }
     }
   } else {
+    ctx.status = 500
     ctx.body = {
       code: -1,
       mgs: '注册失败'
