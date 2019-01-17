@@ -17,24 +17,6 @@ router.get('/', function(ctx, next) {
   ctx.body = 'this is a users response!'
 })
 
-router.post('/addUser', async ctx => {
-  const user = new User({
-    username: ctx.request.body.username,
-    password: ctx.request.body.password
-  })
-  let code
-  try {
-    await user.save()
-    code = 0
-  } catch (error) {
-    code = -1
-  }
-
-  ctx.body = {
-    code
-  }
-})
-
 router.get('/getAllUser', async ctx => {
   const results = await User.find({})
   ctx.body = {
@@ -59,49 +41,37 @@ router.post('/register', async ctx => {
   const { username, password, email } = ctx.request.body
 
   //检查用户名
-  let user = User.find({
+  let user = await User.findOne({
     username
   })
-  if (user.length) {
-    ctx.stats = 410
+  if (user.username) {
+    ctx.status = 410
     ctx.body = {
       code: -1,
-      msg: '已被注册'
+      message: '该用户名已被注册！'
     }
-  }
-
-  let newUser = await User.create({
-    username,
-    password,
-    email,
-    create_time: new Date()
-  })
-  if (newUser) {
-    let res = await axios.post('/login', {
+  }else{
+    let newUser = await User.create({
       username,
-      password
-    })
+      password,
+      email,
+      create_time: new Date()
+    });
+    if (newUser) {
+      let res = await axios.post("/login", { username, password });
 
-    if (res.data && res.data.code === 0) {
-      ctx.body = {
-        code: 0,
-        msg: '注册成功',
-        username,
-        user_id: newUser._id
+      if (res.data && res.data.code === 0) {
+        ctx.body = { code: 0, message: "注册成功", username, user_id: newUser._id };
+      } else {
+        ctx.body = { code: -1, message: "error" };
       }
     } else {
-      ctx.body = {
-        code: -1,
-        msg: 'error'
-      }
-    }
-  } else {
-    ctx.status = 500
-    ctx.body = {
-      code: -1,
-      mgs: '注册失败'
+      ctx.status = 500;
+      ctx.body = { code: -1, mgs: "注册失败" };
     }
   }
+
+  
 })
 
 router.post('/login', async (ctx, next) => {
@@ -134,11 +104,33 @@ router.post('/login', async (ctx, next) => {
 })
 
 router.get('/getUserById/:id', async ctx => {
-  let { id } = ctx.params
+  let token = ctx.header.authorization;
+  let payload = jwt.decode(token,jwtSecret);
   let result = await User.findById(id)
   ctx.body = {
     result
   }
+  if (result) {
+    ctx.body = {
+      code: 0,
+      userInfo: {
+        username: result.username,
+        createTime: result.create_time,
+        email: result.email
+      }
+    }
+  } else {
+    ctx.body = {
+      code: -1,
+      message: '没有这个用户'
+    }
+  }
+})
+router.get('/getUserInfo', async ctx => {
+  let token = ctx.header.authorization;
+  let payload = jwt.decode(token,jwtSecret);
+  let {id} = payload
+  let result = await User.findById(id)
   if (result) {
     ctx.body = {
       code: 0,
