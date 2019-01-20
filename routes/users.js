@@ -44,34 +44,37 @@ router.post('/register', async ctx => {
   let user = await User.findOne({
     username
   })
-  if (user.username) {
+  if (user && user.username) {
     ctx.status = 410
     ctx.body = {
       code: -1,
       message: '该用户名已被注册！'
     }
-  }else{
+  } else {
     let newUser = await User.create({
       username,
       password,
       email,
       create_time: new Date()
-    });
+    })
     if (newUser) {
-      let res = await axios.post("/login", { username, password });
+      let res = await axios.post('api/login', { username, password })
 
       if (res.data && res.data.code === 0) {
-        ctx.body = { code: 0, message: "注册成功", username, user_id: newUser._id };
+        ctx.body = {
+          code: 0,
+          message: '注册成功',
+          username,
+          user_id: newUser._id
+        }
       } else {
-        ctx.body = { code: -1, message: "error" };
+        ctx.body = { code: -1, message: 'error' }
       }
     } else {
-      ctx.status = 500;
-      ctx.body = { code: -1, mgs: "注册失败" };
+      ctx.status = 500
+      ctx.body = { code: -1, mgs: '注册失败' }
     }
   }
-
-  
 })
 
 router.post('/login', async (ctx, next) => {
@@ -91,7 +94,6 @@ router.post('/login', async (ctx, next) => {
     return (ctx.body = {
       code: 0,
       token: token,
-      _id: result.id,
       message: '登陆成功'
     })
   } else {
@@ -104,8 +106,8 @@ router.post('/login', async (ctx, next) => {
 })
 
 router.get('/getUserById/:id', async ctx => {
-  let token = ctx.header.authorization;
-  let payload = jwt.decode(token,jwtSecret);
+  let token = ctx.header.authorization
+  let payload = jwt.decode(token, jwtSecret)
   let result = await User.findById(id)
   ctx.body = {
     result
@@ -114,6 +116,7 @@ router.get('/getUserById/:id', async ctx => {
     ctx.body = {
       code: 0,
       userInfo: {
+        _id: result._id,
         username: result.username,
         createTime: result.create_time,
         email: result.email
@@ -127,17 +130,18 @@ router.get('/getUserById/:id', async ctx => {
   }
 })
 router.get('/getUserInfo', async ctx => {
-  let token = ctx.header.authorization;
-  let payload = jwt.decode(token,jwtSecret);
-  let {id} = payload
-  let result = await User.findById(id)
+  let token = ctx.header.authorization
+  let payload = jwt.decode(token, jwtSecret)
+  let { _id } = payload
+  let result = await User.findById(_id)
   if (result) {
     ctx.body = {
       code: 0,
       userInfo: {
         username: result.username,
         createTime: result.create_time,
-        email: result.email
+        email: result.email,
+        _id: result._id
       }
     }
   } else {
