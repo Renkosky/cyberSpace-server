@@ -1,13 +1,9 @@
 const router = require('koa-router')()
 const User = require('../db/models/user')
 const Redis = require('koa-redis')
-const nodemailer = require('nodemailer')
-const Email = require('../db/config')
 const axios = require('axios')
 const jwt = require('jsonwebtoken')
 const koaJwt = require('koa-jwt') //路由权限控制
-const passport = require('koa-passport')
-const Store = new Redis().client
 
 const mongoose = require('mongoose')
 const jwtSecret = 'secretCyberSpace'
