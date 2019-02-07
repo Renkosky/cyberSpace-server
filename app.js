@@ -11,9 +11,10 @@ const dbconfig = require('./db/config')
 const jwt = require('jsonwebtoken')
 const koaJwt = require('koa-jwt')
 const axios = require('axios')
-var proxy = require('koa-better-http-proxy')
+const proxy = require('koa-better-http-proxy')
 const index = require('./routes/index')
 const users = require('./routes/users')
+const posts = require('./routes/posts')
 // error handler
 onerror(app)
 const host = process.env.HOST || '127.0.0.1'
@@ -74,6 +75,7 @@ app.use(
 // routes
 app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
+app.use(posts.routes(), posts.allowedMethods());
 //router.allowedMethods() //用在了路由匹配router.routes()之后,所以在当所有路由中间件最后调用.此时根据ctx.status设置response响应头
 
 // error-handling

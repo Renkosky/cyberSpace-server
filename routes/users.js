@@ -1,6 +1,5 @@
 const router = require('koa-router')()
 const User = require('../db/models/user')
-const Redis = require('koa-redis')
 const axios = require('axios')
 const jwt = require('jsonwebtoken')
 const koaJwt = require('koa-jwt') //路由权限控制
@@ -147,4 +146,6 @@ router.get('/getUserInfo', async ctx => {
     }
   }
 })
+
+
 module.exports = router

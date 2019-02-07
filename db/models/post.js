@@ -1,9 +1,28 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+
+const commentsSchema = new Schema({
+  uid: {
+    type: String,
+  },
+  author: {
+    type: String,
+  },
+  title: {
+    type: String,
+  },
+  // content: {
+  //   type: String,
+  //   default: ""
+  // },
+  createdAt:{
+    type: Date, default: new Date()
+  }
+});
 const postSchema = new Schema({
   uid: {
     type: String,
-    unique: true
+    required:true
   },
   author: {
     type: String,
@@ -16,7 +35,15 @@ const postSchema = new Schema({
   content: {
     type: String,
     default: ''
+  },
+  comments:{
+    type:Array,
+    default: []
+  },
+  createdAt: {
+    type: Date, default: new Date()
   }
 })
+
 
 module.exports = mongoose.model('post', postSchema, 'posts')
